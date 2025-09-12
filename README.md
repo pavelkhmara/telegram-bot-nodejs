@@ -33,8 +33,8 @@ A simple Telegram bot built with [node-telegram-bot-api](https://github.com/yago
    TELEGRAM_BOT_TOKEN=your-telegram-bot-token-here
 
 4. **Start the bot:**
-```sh
-  npm start
+   ```sh
+   npm start
 
 ### Usage
 Open Telegram and find your bot.
