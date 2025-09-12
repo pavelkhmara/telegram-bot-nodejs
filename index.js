@@ -88,9 +88,10 @@ const start = async () => {
                 if (!topUsers.length) {
                     return bot.sendMessage(chatId, 'No users in the leaderboard yet.');
                 }
+                const medals = ['🥇', '🥈', '🥉'];
                 let message = '🏆 Top Lucky Users:\n\n';
                 topUsers.forEach((u, i) => {
-                    message += `${i + 1}. ${u.nickname || 'NoNick'} — ${u.right} right guesses\n`;
+                    message += `${medals[i] ? medals[i] + ' ' : ''}${i + 1}. ${u.nickname || 'NoNick'} — ${u.points} points (${u.right} right guesses)\n`;
                 });
                 return bot.sendMessage(chatId, message);
             }
