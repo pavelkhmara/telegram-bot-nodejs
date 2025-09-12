@@ -42,12 +42,13 @@ Use /start to begin.
 Use /game to play the number guessing game.
 
 ### Project Structure
-.
-├── [index.js](http://_vscodecontentref_/1)
-├── [options.js](http://_vscodecontentref_/2)
-├── .env
-├── .gitignore
-└── [package.json](http://_vscodecontentref_/3)
+   ```sh
+   .
+   ├── index.js
+   ├── options.js
+   ├── .env
+   ├── .gitignore
+   └── package.json
 
 ### License
 MIT
