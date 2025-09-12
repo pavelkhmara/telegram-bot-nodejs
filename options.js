@@ -11,11 +11,13 @@ module.exports = {
         })
     },
     
-    againOptions: {
-        reply_markup: JSON.stringify({
-            inline_keyboard: [
-                [{ text: 'Play again', callback_data: '/again' }]
-            ]
-        })
+    againOptions: function(t) {
+        return {
+            reply_markup: JSON.stringify({
+                inline_keyboard: [
+                    [{ text: t.playAgain, callback_data: '/again' }]
+                ]
+            })
+        };
     }
 };

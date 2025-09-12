@@ -3,16 +3,20 @@ const { gameOptions, againOptions } = require('./options');
 require('dotenv').config();
 const Sequelize = require('./db');
 const UserModel = require('./models');
+const locales = require('./locales');
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 
 const bot = new TelegramApi(token, { polling: true });
 
 const chats = {};
-const startGame = async (chatId) => {
+let lang = 'en';
+let t = locales[lang];
+
+const startGame = async (chatId, t) => {
     const randomNumber = Math.floor(Math.random() * 10);
     chats[chatId] = randomNumber;
-    await bot.sendMessage(chatId, 'Try to guess', gameOptions);
+    await bot.sendMessage(chatId, t.tryToGuess , gameOptions);
 }
 
 const start = async () => {
@@ -37,6 +41,8 @@ const start = async () => {
     bot.on('message', async msg => {
         const text = msg.text;
         const chatId = msg.chat.id;
+        lang = (msg.from.language_code && locales[msg.from.language_code]) ? msg.from.language_code : 'en';
+        t = locales[lang];
 
         try {
             const user = await UserModel.findOne({ where: { chatId } });
@@ -49,35 +55,32 @@ const start = async () => {
                     await UserModel.create({ chatId, firstName, lastName, username });
                 }
                 await bot.sendSticker(chatId, 'https://tlgrm.eu/_/stickers/8a1/9aa/8a19aab4-98c0-37cb-a3d4-491cb94d7e12/1.webp');
-                return bot.sendMessage(chatId, `Hello, ${msg.from.first_name} ${msg.from.last_name},\nWelcome to this awesome bot`);
+                return bot.sendMessage(chatId, t.welcome(msg.from.first_name, msg.from.last_name));
             }
         
             if (text === '/info') {
                 if (!user) {
-                    return bot.sendMessage(chatId, 'You are not registered');
+                    return bot.sendMessage(chatId, t.notRegistered);
                 }
-                return bot.sendMessage(chatId, `${user.nickname ? user.nickname + '\n' : ''}` +
-                    `You have guessed right ${user.right} times` +
-                    `\nYour points: ${user.points}`
-                );
+                return bot.sendMessage(chatId, t.stats(user));
             }
     
             if (text === '/game') {
-                await bot.sendMessage(chatId, 'I will mind number from 0 to 9, try to guess it');
-                return startGame(chatId);
+                await bot.sendMessage(chatId, t.startGame);
+                return startGame(chatId, t);
             }
 
             if (text.startsWith('/setnick')) {
                 const nickname = text.replace('/setnick', '').trim();
                 if (!nickname) {
-                    return bot.sendMessage(chatId, 'Please provide a nickname. Example: /setnick LuckyJoe');
+                    return bot.sendMessage(chatId, t.provideNick);
                 }
                 if (!user) {
-                    return bot.sendMessage(chatId, 'You are not registered');
+                    return bot.sendMessage(chatId, t.notRegistered);
                 }
                 user.nickname = nickname;
                 await user.save();
-                return bot.sendMessage(chatId, `Your nickname is set to: ${nickname}`);
+                return bot.sendMessage(chatId, t.nickSet(nickname));
             }
     
             if (text === '/top') {
@@ -86,19 +89,19 @@ const start = async () => {
                     limit: 10
                 });
                 if (!topUsers.length) {
-                    return bot.sendMessage(chatId, 'No users in the leaderboard yet.');
+                    return bot.sendMessage(chatId, t.noUsers);
                 }
                 const medals = ['🥇', '🥈', '🥉'];
-                let message = '🏆 Top Lucky Users:\n\n';
+                let message = t.topTitle;
                 topUsers.forEach((u, i) => {
-                    message += `${medals[i] ? medals[i] + ' ' : ''}${i + 1}. ${u.nickname || 'NoNick'} — ${u.points} points (${u.right} right guesses)\n`;
+                    message += `${medals[i] ? medals[i] + ' ' : ''}${i + 1}. ${u.nickname || 'NoNick'} — ${u.points} ${points} (${u.right} ${rightGuesses})\n`;
                 });
                 return bot.sendMessage(chatId, message);
             }
 
-            return bot.sendMessage(chatId, 'I do not understand you, please try again.');
+            return bot.sendMessage(chatId, t.unknown);
         } catch (e) {
-            return bot.sendMessage(chatId, 'Sorry :( Error occurred');
+            return bot.sendMessage(chatId, t.error);
         }
     
         
@@ -107,6 +110,8 @@ const start = async () => {
     bot.on('callback_query', async msg => {
         const data = msg.data;
         const chatId = msg.message.chat.id;
+        lang = (msg.from.language_code && locales[msg.from.language_code]) ? msg.from.language_code : 'en';
+        t = locales[lang];
 
         const user = await UserModel.findOne({ where: { chatId } });
         if (!user) {
@@ -118,25 +123,25 @@ const start = async () => {
         }
 
         if (data === '/again') {
-            return startGame(chatId);
+            return startGame(chatId, t);
         }
 
         if (!(chatId in chats)) {
-            return bot.sendMessage(chatId, 'This round is already over. Start a new game with /game.', againOptions);
+            return bot.sendMessage(chatId, t.again, againOptions(t));
         }
         
         if (data == chats[chatId]) {
             user.right += 1;
-            user.points += 1;
+            user.points += 3;
             
-            await bot.sendMessage(chatId, `Congratulations, you guessed the number ${chats[chatId]}`, againOptions);
+            await bot.sendMessage(chatId, t.guessed(chats[chatId]), againOptions(t));
 
             delete chats[chatId];
         } else {
             user.wrong += 1;
             user.points -= 1;
 
-            await bot.sendMessage(chatId, `Sorry, you did not guess, I thought of the number ${chats[chatId]}`, againOptions);
+            await bot.sendMessage(chatId, t.notGuessed(chats[chatId]), againOptions(t));
 
             delete chats[chatId];
         }
