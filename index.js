@@ -39,7 +39,7 @@ const start = async () => {
         const chatId = msg.chat.id;
 
         try {
-            const user = await UserModel.findOne({ chatId });
+            const user = await UserModel.findOne({ where: { chatId } });
             if (text === '/start') {
                 if (!user) {
                     const firstName = msg.from.first_name;
@@ -108,7 +108,7 @@ const start = async () => {
         const data = msg.data;
         const chatId = msg.message.chat.id;
 
-        const user = await UserModel.findOne({ chatId });
+        const user = await UserModel.findOne({ where: { chatId } });
         if (!user) {
             const firstName = msg.from.first_name;
             const lastName = msg.from.last_name;
