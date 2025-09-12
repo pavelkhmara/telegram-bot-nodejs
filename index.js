@@ -39,14 +39,20 @@ const start = async () => {
         const chatId = msg.chat.id;
 
         try {
+            const user = await UserModel.findOne({ chatId });
             if (text === '/start') {
-                await UserModel.create({ chatId });
+                if (!user) {
+                    const firstName = msg.from.first_name;
+                    const lastName = msg.from.last_name;
+                    const username = msg.from.username;
+
+                    await UserModel.create({ chatId, firstName, lastName, username });
+                }
                 await bot.sendSticker(chatId, 'https://tlgrm.eu/_/stickers/8a1/9aa/8a19aab4-98c0-37cb-a3d4-491cb94d7e12/1.webp');
                 return bot.sendMessage(chatId, `Hello, ${msg.from.first_name} ${msg.from.last_name},\nWelcome to this awesome bot`);
             }
         
             if (text === '/info') {
-                const user = await UserModel.findOne({ chatId });
                 if (!user) {
                     return bot.sendMessage(chatId, 'You are not registered');
                 }
@@ -66,7 +72,6 @@ const start = async () => {
                 if (!nickname) {
                     return bot.sendMessage(chatId, 'Please provide a nickname. Example: /setnick LuckyJoe');
                 }
-                const user = await UserModel.findOne({ chatId });
                 if (!user) {
                     return bot.sendMessage(chatId, 'You are not registered');
                 }
@@ -77,7 +82,7 @@ const start = async () => {
     
             if (text === '/top') {
                 const topUsers = await UserModel.findAll({
-                    order: [['right', 'DESC']],
+                    order: [['points', 'DESC']],
                     limit: 10
                 });
                 if (!topUsers.length) {
@@ -101,12 +106,18 @@ const start = async () => {
     bot.on('callback_query', async msg => {
         const data = msg.data;
         const chatId = msg.message.chat.id;
-        if (data === '/again') {
-            return startGame(chatId);
-        }
+
         const user = await UserModel.findOne({ chatId });
         if (!user) {
-            await UserModel.create({ chatId });
+            const firstName = msg.from.first_name;
+            const lastName = msg.from.last_name;
+            const username = msg.from.username;
+
+            await UserModel.create({ chatId, firstName, lastName, username });
+        }
+
+        if (data === '/again') {
+            return startGame(chatId);
         }
 
         if (!(chatId in chats)) {
