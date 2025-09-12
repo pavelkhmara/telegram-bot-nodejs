@@ -20,7 +20,7 @@ A simple Telegram bot built with [node-telegram-bot-api](https://github.com/yago
 
 1. **Clone the repository:**
    ```sh
-   git clone https://github.com/<your-username>/<your-repo>.git
+   git clone https://github.com/pavelkhmara/telegram-bot-nodejs.git
    cd <your-repo>
    
 
@@ -28,7 +28,7 @@ A simple Telegram bot built with [node-telegram-bot-api](https://github.com/yago
    ```sh
    npm install
 
-3. **Create a .env file in the root directory and add your bot token:**
+3. **Create a `.env` file in the root directory and add your bot token:**
    ```sh
    TELEGRAM_BOT_TOKEN=your-telegram-bot-token-here
 
@@ -38,8 +38,8 @@ A simple Telegram bot built with [node-telegram-bot-api](https://github.com/yago
 
 ### Usage
 Open Telegram and find your bot.
-Use /start to begin.
-Use /game to play the number guessing game.
+Use `/start` to begin.
+Use `/game` to play the number guessing game.
 
 ### Project Structure
    ```sh
@@ -49,6 +49,7 @@ Use /game to play the number guessing game.
    ├── .env
    ├── .gitignore
    └── package.json
+   ```
 
 ### License
 MIT
