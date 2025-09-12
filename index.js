@@ -45,7 +45,7 @@ const start = async () => {
         t = locales[lang];
 
         try {
-            const user = await UserModel.findOne({ where: { chatId } });
+            const user = await UserModel.findOne({ where: { chatId: chatId } });
             if (text === '/start') {
                 if (!user) {
                     const firstName = msg.from.first_name;
@@ -107,13 +107,13 @@ const start = async () => {
         
     });
 
-    bot.on('callback_query', async msg => {
+    bot.on('callback_query', async msg => {        
         const data = msg.data;
         const chatId = msg.message.chat.id;
         lang = (msg.from.language_code && locales[msg.from.language_code]) ? msg.from.language_code : 'en';
         t = locales[lang];
 
-        const user = await UserModel.findOne({ where: { chatId } });
+        const user = await UserModel.findOne({ where: { chatId: chatId } });
         if (!user) {
             const firstName = msg.from.first_name;
             const lastName = msg.from.last_name;
