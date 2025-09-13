@@ -10,8 +10,16 @@ const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramApi(token, { polling: true });
 
 const chats = {};
-let lang = 'en';
-let t = locales[lang];
+
+function getT(msg, user) {
+    let lang = 'en';
+    if (user && user.language) {
+        lang = user.language;
+    } else if (msg.from.language_code && locales[msg.from.language_code]) {
+        lang = msg.from.language_code;
+    }
+    return locales[lang];
+}
 
 const startGame = async (chatId, t) => {
     const randomNumber = Math.floor(Math.random() * 10);
@@ -35,29 +43,31 @@ const start = async () => {
         { command: '/info', description: 'Check points' },
         { command: '/game', description: 'Play a game' },
         { command: '/setnick', description: 'Set your nickname' },
+        { command: '/setlang', description: 'Set your language (en/pl/ru)' },
         { command: '/top', description: 'Show top lucky users' }
     ]);
     
     bot.on('message', async msg => {
         const text = msg.text;
         const chatId = msg.chat.id;
-        lang = (msg.from.language_code && locales[msg.from.language_code]) ? msg.from.language_code : 'en';
-        t = locales[lang];
 
         try {
-            const user = await UserModel.findOne({ where: { chatId } });
+            let user = await UserModel.findOne({ where: { chatId } });
+            const t = getT(msg, user);
+
             if (text === '/start') {
                 if (!user) {
                     const firstName = msg.from.first_name;
                     const lastName = msg.from.last_name;
                     const username = msg.from.username;
 
-                    await UserModel.create({ chatId, firstName, lastName, username });
+                    user = await UserModel.create({ chatId, firstName, lastName, username });
                 }
+                await setUserCommands(user.language || 'en', chatId);
                 await bot.sendSticker(chatId, 'https://tlgrm.eu/_/stickers/8a1/9aa/8a19aab4-98c0-37cb-a3d4-491cb94d7e12/1.webp');
                 return bot.sendMessage(chatId, t.welcome(msg.from.first_name, msg.from.last_name));
             }
-        
+
             if (text === '/info') {
                 if (!user) {
                     return bot.sendMessage(chatId, t.notRegistered);
@@ -73,7 +83,7 @@ const start = async () => {
             if (text.startsWith('/setnick')) {
                 const nickname = text.replace('/setnick', '').trim();
                 if (!nickname) {
-                    return bot.sendMessage(chatId, t.provideNick);
+                    return bot.sendMessage(chatId, t.provideNick, { parse_mode: 'Markdown' });
                 }
                 if (!user) {
                     return bot.sendMessage(chatId, t.notRegistered);
@@ -82,7 +92,22 @@ const start = async () => {
                 await user.save();
                 return bot.sendMessage(chatId, t.nickSet(nickname));
             }
-    
+
+            if (text.startsWith('/setlang')) {
+                const lang = text.replace('/setlang', '').trim().toLowerCase();
+                if (!['en', 'pl', 'ru'].includes(lang)) {
+                    return bot.sendMessage(chatId, 'Available languages: en, pl, ru\nExample: \`/setlang pl\`', { parse_mode: 'Markdown' });
+                }
+                if (!user) {
+                    return bot.sendMessage(chatId, t.notRegistered);
+                }
+                user.language = lang;
+                await user.save();
+                await setUserCommands(lang, chatId);
+                const tNew = locales[lang];
+                return bot.sendMessage(chatId, tNew.languageSet ? tNew.languageSet(lang) : `Language set to: ${lang}`);
+            }
+
             if (text === '/top') {
                 const topUsers = await UserModel.findAll({
                     order: [['points', 'DESC']],
@@ -104,24 +129,21 @@ const start = async () => {
         } catch (e) {
             return bot.sendMessage(chatId, t.error);
         }
-    
         
     });
 
-    bot.on('callback_query', async msg => {        
-        const data = msg.data;
+    bot.on('callback_query', async msg => {
         const chatId = msg.message.chat.id;
-        lang = (msg.from.language_code && locales[msg.from.language_code]) ? msg.from.language_code : 'en';
-        t = locales[lang];
-
-        const user = await UserModel.findOne({ where: { chatId }});
+        let user = await UserModel.findOne({ where: { chatId } });
         if (!user) {
             const firstName = msg.from.first_name;
             const lastName = msg.from.last_name;
             const username = msg.from.username;
-
-            await UserModel.create({ chatId, firstName, lastName, username });
+            user = await UserModel.create({ chatId, firstName, lastName, username });
         }
+
+        const t = getT(msg, user);
+        const data = msg.data;
 
         if (data === '/again') {
             return startGame(chatId, t);
@@ -149,5 +171,17 @@ const start = async () => {
         await user.save();
     });
 };
+
+async function setUserCommands(lang, userId) {
+    const t = locales[lang] || locales['en'];
+    await bot.setMyCommands([
+        { command: '/start', description: t.commands.start },
+        { command: '/info', description: t.commands.info },
+        { command: '/game', description: t.commands.game },
+        { command: '/setnick', description: t.commands.setnick },
+        { command: '/setlang', description: t.commands.setlang },
+        { command: '/top', description: t.commands.top }
+    ], { language_code: lang, scope: { type: 'chat', chat_id: userId } });
+}
 
 start();

@@ -8,7 +8,7 @@ module.exports = {
         guessed: num => `Congratulations, you guessed the number ${num}`,
         notGuessed: num => `Sorry, you did not guess, I thought of the number ${num}`,
         again: 'This round is already over. Start a new game with /game.',
-        provideNick: 'Please provide a nickname. Example: /setnick LuckyJoe',
+        provideNick: 'Please provide a nickname. Example: \`/setnick LuckyJoe\`',
         nickSet: nick => `Your nickname is set to: ${nick}`,
         noUsers: 'No users in the leaderboard yet.',
         topTitle: '🏆 Top Lucky Users:\n\n',
@@ -18,7 +18,16 @@ module.exports = {
         points: 'points',
         rightGuesses: 'right guesses',
         error: 'Sorry :( Error occurred',
-        playAgain: 'Play again'
+        playAgain: 'Play again',
+        languageSet: (lang) => `Language set to: ${lang}`,
+        commands: {
+            start: 'Start the bot',
+            info: 'Check points',
+            game: 'Play a game',
+            setnick: 'Set your nickname',
+            setlang: 'Set your language',
+            top: 'Show top lucky users'
+        }
     },
     ru: {
         welcome: (first, last='') => `Привет, ${first} ${last},\nДобро пожаловать в этого бота!`,
@@ -27,7 +36,7 @@ module.exports = {
         guessed: num => `Поздравляем, вы угадали число ${num}`,
         notGuessed: num => `К сожалению, вы не угадали, я загадал число ${num}`,
         again: 'Раунд уже завершён. Начните новую игру с /game.',
-        provideNick: 'Пожалуйста, укажите ник. Пример: /setnick LuckyJoe',
+        provideNick: 'Пожалуйста, укажите ник. Пример: \`/setnick LuckyJoe\`',
         nickSet: nick => `Ваш ник установлен: ${nick}`,
         noUsers: 'В таблице лидеров пока нет пользователей.',
         topTitle: '🏆 Самые везучие пользователи:\n\n',
@@ -37,7 +46,16 @@ module.exports = {
         points: 'очков',
         rightGuesses: 'правильных угадываний',
         error: 'Извините :( Произошла ошибка',
-        playAgain: 'Играть снова'
+        playAgain: 'Играть снова',
+        languageSet: (lang) => `Язык установлен: ${lang}`,
+        commands: {
+            start: 'Запустить бота',
+            info: 'Показать очки',
+            game: 'Играть',
+            setnick: 'Установить никнейм',
+            setlang: 'Выбрать язык',
+            top: 'Показать самых везучих'
+        }
     },
     pl: {
         welcome: (first, last='') => `Cześć, ${first} ${last},\nWitamy w tym niesamowitym bocie`,
@@ -46,16 +64,25 @@ module.exports = {
         guessed: num => `Gratulacje, zgadłeś liczbę ${num}`,
         notGuessed: num => `Niestety nie zgadłeś, pomyślałem o liczbie ${num}`,
         again: 'Ta runda już się zakończyła. Rozpocznij nową grę za pomocą /game.',
-        provideNick: 'Proszę podać pseudonim. Przykład: /setnick LuckyJoe',
+        provideNick: 'Proszę podać pseudonim. Przykład: \`/setnick LuckyJoe\`',
         nickSet: nick => `Twój pseudonim to: ${nick}`,
         noUsers: 'Brak użytkowników w rankingu.',
-        topTitle: '🏆 Najszczęśliwsi użytkownicy:\n\n',
+        topTitle: '🏆 Farciarze :\n\n',
         unknown: 'Nie rozumiem cię, spróbuj ponownie.',
         stats: (user) => `${user.nickname ? user.nickname + '\n' : ''}Zgadłeś poprawnie ${user.right} razy\nTwoje punkty: ${user.points}`,
         startGame: 'Wymyślę liczbę od 0 do 9, spróbuj ją zgadnąć',
         points: 'punktów',
         rightGuesses: 'trafnych zgadnięć',
         error: 'Przepraszam :( Wystąpił błąd',
-        playAgain: 'Zagraj ponownie'
+        playAgain: 'Zagraj ponownie',
+        languageSet: (lang) => `Język ustawiony na: ${lang}`,
+        commands: {
+            start: 'Uruchom bota',
+            info: 'Sprawdź punkty',
+            game: 'Zagraj',
+            setnick: 'Ustaw swój pseudonim',
+            setlang: 'Ustaw swój język',
+            top: 'Pokaż top użytkowników'
+        }
     }
 };
