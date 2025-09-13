@@ -23,7 +23,7 @@ const start = async () => {
     try {
         await Sequelize.authenticate();
         await Sequelize.sync();
-        console.log('Connection has been established successfully.');
+        console.log('Connection has been established successfully.\n');
     } catch (error) {
         console.error('Unable to connect to the database:', error);
     }
@@ -45,7 +45,7 @@ const start = async () => {
         t = locales[lang];
 
         try {
-            const user = await UserModel.findOne({ where: { chatId: chatId } });
+            const user = await UserModel.findOne({ where: { chatId } });
             if (text === '/start') {
                 if (!user) {
                     const firstName = msg.from.first_name;
@@ -88,13 +88,14 @@ const start = async () => {
                     order: [['points', 'DESC']],
                     limit: 10
                 });
+
                 if (!topUsers.length) {
                     return bot.sendMessage(chatId, t.noUsers);
                 }
                 const medals = ['🥇', '🥈', '🥉'];
                 let message = t.topTitle;
                 topUsers.forEach((u, i) => {
-                    message += `${medals[i] ? medals[i] + ' ' : ''}${i + 1}. ${u.nickname || 'NoNick'} — ${u.points} ${points} (${u.right} ${rightGuesses})\n`;
+                    message += `${medals[i] ? medals[i] + ' ' : ''}${i + 1}. ${u.nickname || 'NoNick'} — ${u.points} ${t.points} (${u.right} ${t.rightGuesses})\n`;
                 });
                 return bot.sendMessage(chatId, message);
             }
@@ -113,7 +114,7 @@ const start = async () => {
         lang = (msg.from.language_code && locales[msg.from.language_code]) ? msg.from.language_code : 'en';
         t = locales[lang];
 
-        const user = await UserModel.findOne({ where: { chatId: chatId } });
+        const user = await UserModel.findOne({ where: { chatId }});
         if (!user) {
             const firstName = msg.from.first_name;
             const lastName = msg.from.last_name;
